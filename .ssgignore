@@ -1,0 +1,4 @@
+.ssgignore
+.git
+.gitignore
+scripts

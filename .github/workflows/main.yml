@@ -1,0 +1,37 @@
+name: Pages CI/CD
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '$GITHUB_WORKSPACE/scripts'
+          
+      - name: Build
+        id: build
+        run: |
+          dir=$(mktemp -d)
+          echo ::set-output name=dir::"$dir"
+          "$GITHUB_WORKSPACE"/scripts/build.sh "$dir"
+        
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          cname: web.vytrac.me
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: "${{ steps.build.outputs.dir }}"
+          commit_message: ${{ github.event.head_commit.message }}

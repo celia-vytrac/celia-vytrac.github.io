@@ -1,0 +1,132 @@
+#!/bin/bash
+# shellcheck disable=SC2001
+#
+# https://www.romanzolotarev.com/bin/rssg
+# Copyright 2018 Roman Zolotarev <hi@romanzolotarev.com>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+set -e
+
+main () {
+    echo "rssg working with file: $1" >&2 
+    [[ -n "$1" ]] || usage
+    [[ -f "$1" ]] || no_file "$1"
+
+    index_file=$(readlink -f "$1")
+    [[ -z "${index_file##*html}" ]] && html=$(cat "$index_file")
+    [[ -z "${index_file##*md}" ]] && html=$(md_to_html "$index_file")
+    [[ -n "$html" ]] || usage
+
+    base_url="$(get_url <<< "$html" | sed 's#\(.*\)/[^/]*#\1#')"
+
+    url=$(get_url <<< "$html")
+
+    items=$(get_items <<< "$html")
+
+    rss=$(render_item "$base" "$base_url" <<< "$items")
+
+    echo "$rss"
+}
+
+
+usage() {
+    echo "usage: ${0##*/} file.{html,md}" >&2
+    exit 1
+}
+
+
+no_file() {
+    echo "${0##*/}: $1: No such file" >&2
+    exit 1
+}
+
+
+md_to_html() {
+    "$GITHUB_WORKSPACE/scripts/render.sh" "$1"
+}
+
+
+get_title() {
+    awk 'tolower($0)~/^<h1/{gsub(/<[^>]*>/,"",$0);print;exit}'
+}
+
+
+get_url() {
+    grep -i '<a .*rss.xml"' |
+        head -1 |
+        sed 's#.*href="\(.*\)".*#\1#'
+}
+
+
+get_items() {
+    grep -i 'href=".*" title="' |
+        sed 's#.*href="\(.*\)" title="\(.*\)">\(.*\)</a>.*#\1 \2 \3#'
+}
+
+
+remove_tags() {
+    sed 's#<[^>]*>##g;s#</[^>]*>##g'
+}
+
+
+remove_nbsp() {
+    sed 's#\&nbsp;# #g'
+}
+
+
+rel_to_abs_urls() {
+    site_url="$1"
+    base_url="$2"
+
+    abs='s#(src|href)="/([^"]*)"#\1="'"$site_url"/'\2"#g'
+    rel='s#(src|href)="([^:/"]*)"#\1="'"$base_url"/'\2"#g'
+    sed -E "$abs;$rel"
+}
+
+
+render_item() {
+    base="$1"
+    base_url="$2"
+    item="$3"
+
+    site_url=$(sed 's#\(.*//.*\)/.*#\1#' <<< "$base_url")
+
+    #date=$(echo "$item"|awk '{print$2}')
+    url=$(awk '{print$1}' <<< "$item")
+
+    f="$base/$url"
+    [[ -f "$f" ]] && html=$(cat "$f")
+    [[ -f "${f%\.html}.md" ]] && html=$(md_to_html "${f%\.html}.md")
+
+    description=$(
+    rel_to_abs_urls "$site_url" "$base_url" <<< "$html" |
+        remove_nbsp
+    )
+    title=$(get_title <<< "$description")
+
+    echo '
+    <item>
+    <guid></guid>
+    <pubDate>'"$(date -R)"'</pubDate>
+    <title>'"$title"'</title>
+    <description><![CDATA[
+
+    '"$description"'
+
+    ]]></description>
+    </item>'
+}
+
+
+main "$@"
