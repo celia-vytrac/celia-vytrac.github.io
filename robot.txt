@@ -1,0 +1,2 @@
+user-agent: *
+sitemap: https://web.vytrac.me/sitemap.xml

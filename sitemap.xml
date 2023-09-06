@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"
+xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url><loc>web.vytrac.me/patterns/</loc><lastmod>2023-09-06</lastmod><priority>1.0</priority></url>
+<url><loc>web.vytrac.me/projects/</loc><lastmod>2023-09-06</lastmod><priority>1.0</priority></url>
+<url><loc>web.vytrac.me/projects/thue.html</loc><lastmod>2023-09-06</lastmod><priority>1.0</priority></url>
+<url><loc>web.vytrac.me/homelab/</loc><lastmod>2023-09-06</lastmod><priority>1.0</priority></url>
+<url><loc>web.vytrac.me/index.html</loc><lastmod>2023-09-06</lastmod><priority>1.0</priority></url>
+<url><loc>web.vytrac.me/writing/</loc><lastmod>2023-09-06</lastmod><priority>1.0</priority></url>
+<url><loc>web.vytrac.me/writing/Astraeas+Liminal+Dreams.html</loc><lastmod>2023-09-06</lastmod><priority>1.0</priority></url>
+<url><loc>web.vytrac.me/404.html</loc><lastmod>2023-09-06</lastmod><priority>1.0</priority></url>
+</urlset>

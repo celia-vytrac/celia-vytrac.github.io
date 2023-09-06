@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" class="bg fg serif lh-copy pa">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Documentation for my Homelab</title>
+        <link rel="shortcut icon" href="/favicon.png">
+        <link rel="stylesheet" href="/css/style.css">
+        <link rel="stylesheet" href="/css/github-dark.css">
+        <link rel="alternate" type="application/atom+xml" href="/rss.xml">
+    </head>
+    <body class="mw w-100 center">
+        <div class="nav">
+            <a href="/"><img class="header-pic" src="/images/LinuxPenguinBody.jpg"></a>
+            <a href="/projects">Projects</a>&nbsp;
+            <a href="/homelab">Homelab</a>&nbsp;
+            <a href="/writing">Writing</a>&nbsp;
+            <a href="/patterns">Patterns</a>&nbsp;
+        </div>
+<h1>Documentation for my Homelab</h1>
+<h2>Network Topology</h2>
+<h2>Server Specifications</h2>
+<h4>Physical Hardware</h4>
+<table role="table">
+<thead>
+<tr>
+<th>hostname</th>
+<th>server</th>
+<th>operating system</th>
+<th>CPU</th>
+<th>RAM</th>
+<th>disks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>prox01</td>
+<td>HP Proliant DL 380 g8</td>
+<td>proxmox 6.1-1</td>
+<td>12 core Intel Xeon CPU E5649 @ 2.53GHz x 2</td>
+<td>16 GB @ XXX hz</td>
+<td>8 x 128 GB SAS raid 50</td>
+</tr>
+</tbody>
+</table>
+<h4>proxmox VMs</h4>
+<table role="table">
+<thead>
+<tr>
+<th>hostname</th>
+<th>purpose</th>
+<th>disk</th>
+<th>ram</th>
+<th>cores</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>psql01</td>
+<td>postgres server</td>
+<td>128 GB</td>
+<td>1 GB</td>
+<td>1</td>
+</tr>
+<tr>
+<td>ctrl01</td>
+<td>unifi controller</td>
+<td>16 GB</td>
+<td>512 MB</td>
+<td>1</td>
+</tr>
+<tr>
+<td>ids01</td>
+<td>intrusion detection system</td>
+<td>32 GB</td>
+<td>512 MB</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

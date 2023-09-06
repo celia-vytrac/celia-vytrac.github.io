@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" class="bg fg serif lh-copy pa">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>interpreter for esoteric language Thue</title>
+        <link rel="shortcut icon" href="/favicon.png">
+        <link rel="stylesheet" href="/css/style.css">
+        <link rel="stylesheet" href="/css/github-dark.css">
+        <link rel="alternate" type="application/atom+xml" href="/rss.xml">
+    </head>
+    <body class="mw w-100 center">
+        <div class="nav">
+            <a href="/"><img class="header-pic" src="/images/LinuxPenguinBody.jpg"></a>
+            <a href="/projects">Projects</a>&nbsp;
+            <a href="/homelab">Homelab</a>&nbsp;
+            <a href="/writing">Writing</a>&nbsp;
+            <a href="/patterns">Patterns</a>&nbsp;
+        </div>
+<h1>interpreter for esoteric language Thue</h1>
+<h2>thue.sh</h2>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#!</span>/bin/bash</span>
+
+<span class="pl-c1">set</span> -e
+
+usage=<span class="pl-s"><span class="pl-pds">"</span>Usage: thue.sh [-h] [-t] -f &lt;FILE&gt;<span class="pl-pds">"</span></span>
+
+CAN_BE=<span class="pl-s"><span class="pl-pds">"</span>::=<span class="pl-pds">"</span></span>
+INPUT_STREAM=<span class="pl-s"><span class="pl-pds">"</span>:::<span class="pl-pds">"</span></span>
+OUTPUT_STREAM=<span class="pl-s"><span class="pl-pds">"</span>~<span class="pl-pds">"</span></span>
+TRACE=0
+
+<span class="pl-en">main</span>() {
+  <span class="pl-k">while</span> <span class="pl-c1">getopts</span> <span class="pl-s"><span class="pl-pds">"</span>:htf:<span class="pl-pds">"</span></span> opt<span class="pl-k">;</span> <span class="pl-k">do</span>
+    <span class="pl-k">case</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$opt</span><span class="pl-pds">"</span></span> <span class="pl-k">in</span>
+      h)
+        <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$usage</span><span class="pl-pds">"</span></span>
+        <span class="pl-c1">exit</span> 0
+        ;;
+      t)
+        TRACE=1
+        ;;
+      f)
+        [[ <span class="pl-k">!</span> <span class="pl-k">-f</span> <span class="pl-smi">$OPTARG</span> ]] <span class="pl-k">&amp;&amp;</span> <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$OPTARG</span>: File does not exist<span class="pl-pds">"</span></span> <span class="pl-k">&amp;&amp;</span> <span class="pl-c1">exit</span> 1
+        file=<span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$OPTARG</span><span class="pl-pds">"</span></span>
+        ;;
+      <span class="pl-cce">\?</span>)
+        <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>Invalid option: -<span class="pl-smi">$OPTARG</span><span class="pl-pds">"</span></span> <span class="pl-k">1&gt;&amp;2</span>
+        <span class="pl-c1">exit</span> 1
+        ;;
+      :)
+        <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>Invalid option: -<span class="pl-smi">$OPTARG</span> requires an argument<span class="pl-pds">"</span></span> <span class="pl-k">1&gt;&amp;2</span>
+        <span class="pl-c1">exit</span> 1
+        ;;
+    <span class="pl-k">esac</span>
+  <span class="pl-k">done</span>
+  [[ <span class="pl-k">!</span> <span class="pl-smi">$file</span> ]] <span class="pl-k">&amp;&amp;</span> <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>Option -f is required<span class="pl-pds">"</span></span> <span class="pl-k">&amp;&amp;</span> <span class="pl-c1">exit</span> 1
+  interpret <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$file</span><span class="pl-pds">"</span></span>
+}
+
+<span class="pl-en">interpret</span>() {
+  <span class="pl-s"><span class="pl-pds">((</span><span class="pl-smi">$#</span> <span class="pl-k">==</span> <span class="pl-c1">1</span><span class="pl-pds">))</span></span> <span class="pl-k">||</span> <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>Incorrect number of arguments<span class="pl-pds">"</span></span> <span class="pl-k">||</span> <span class="pl-c1">exit</span> 1
+  mapfile -t rules <span class="pl-k">&lt;</span> <span class="pl-s"><span class="pl-pds">&lt;(</span>sed <span class="pl-s"><span class="pl-pds">'</span>/^$/d<span class="pl-pds">'</span></span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$1</span><span class="pl-pds">"</span></span> <span class="pl-k">|</span> sed -n <span class="pl-s"><span class="pl-pds">"</span>/^<span class="pl-smi">$CAN_BE</span>/q;p<span class="pl-pds">"</span></span><span class="pl-pds">)</span></span>
+  current=(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">${rules[@]}</span><span class="pl-pds">"</span></span>)
+  statement=<span class="pl-s"><span class="pl-pds">"</span><span class="pl-s"><span class="pl-pds">$(</span>sed <span class="pl-s"><span class="pl-pds">'</span>/^$/d<span class="pl-pds">'</span></span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$1</span><span class="pl-pds">"</span></span> <span class="pl-k">|</span> sed -e <span class="pl-s"><span class="pl-pds">"</span>1,/^<span class="pl-smi">$CAN_BE</span>/d<span class="pl-pds">"</span></span><span class="pl-pds">)</span></span><span class="pl-pds">"</span></span>
+  <span class="pl-k">while</span> <span class="pl-s"><span class="pl-pds">((</span><span class="pl-smi">${<span class="pl-k">#</span>current[@]}</span><span class="pl-pds">))</span></span><span class="pl-k">;</span> <span class="pl-k">do</span>
+    <span class="pl-s"><span class="pl-pds">((</span><span class="pl-k">!</span>TRACE<span class="pl-pds">))</span></span> <span class="pl-k">||</span> <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$statement</span><span class="pl-pds">"</span></span>
+    index=<span class="pl-s"><span class="pl-pds">"</span><span class="pl-s"><span class="pl-pds">$((</span>RANDOM <span class="pl-k">%</span> <span class="pl-smi">${<span class="pl-k">#</span>current[@]}</span><span class="pl-pds">))</span></span><span class="pl-pds">"</span></span>
+    lhs=<span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">${current[$index]<span class="pl-k">%%</span><span class="pl-smi">$CAN_BE</span><span class="pl-k">*</span>}</span><span class="pl-pds">"</span></span>
+    rhs=<span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">${current[$index]<span class="pl-k">##*</span><span class="pl-smi">$CAN_BE</span>}</span><span class="pl-pds">"</span></span>
+    <span class="pl-k">if</span> [[ <span class="pl-smi">$statement</span> <span class="pl-k">==</span> <span class="pl-k">*</span><span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$lhs</span><span class="pl-pds">"</span></span><span class="pl-k">*</span> <span class="pl-k">&amp;&amp;</span> <span class="pl-k">-n</span> <span class="pl-smi">$lhs</span> ]]<span class="pl-k">;</span> <span class="pl-k">then</span>
+      <span class="pl-k">if</span> [[ <span class="pl-smi">${rhs<span class="pl-k">::</span>1}</span> <span class="pl-k">==</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$OUTPUT_STREAM</span><span class="pl-pds">"</span></span> ]]<span class="pl-k">;</span> <span class="pl-k">then</span>
+        <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">${rhs<span class="pl-k">:</span>1}</span><span class="pl-pds">"</span></span>
+        statement=<span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">${statement<span class="pl-k">#</span><span class="pl-smi">$lhs</span>}</span><span class="pl-pds">"</span></span>
+      <span class="pl-k">elif</span> [[ <span class="pl-smi">$rhs</span> <span class="pl-k">==</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$INPUT_STREAM</span><span class="pl-pds">"</span></span> ]]<span class="pl-k">;</span> <span class="pl-k">then</span>
+        <span class="pl-c1">read</span> -p <span class="pl-s"><span class="pl-pds">"</span>&gt; <span class="pl-pds">"</span></span> input
+        statement=<span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">${statement<span class="pl-k">/</span><span class="pl-smi">$lhs</span><span class="pl-k">/</span><span class="pl-smi">$input</span>}</span><span class="pl-pds">"</span></span>
+      <span class="pl-k">else</span>
+        statement=<span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">${statement<span class="pl-k">/</span><span class="pl-smi">$lhs</span><span class="pl-k">/</span><span class="pl-smi">$rhs</span>}</span><span class="pl-pds">"</span></span>
+      <span class="pl-k">fi</span>
+      current=(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">${rules[@]}</span><span class="pl-pds">"</span></span>)
+    <span class="pl-k">else</span>
+      <span class="pl-c1">unset</span> <span class="pl-s"><span class="pl-pds">'</span>current[index]<span class="pl-pds">'</span></span>
+      current=(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">${current[@]}</span><span class="pl-pds">"</span></span>)
+    <span class="pl-k">fi</span>
+  <span class="pl-k">done</span>
+  [[ <span class="pl-k">-z</span> <span class="pl-smi">$statement</span> ]] <span class="pl-k">||</span> <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$statement</span><span class="pl-pds">"</span></span>
+}
+
+main <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$@</span><span class="pl-pds">"</span></span></pre></div>
+</body>
+</html>
