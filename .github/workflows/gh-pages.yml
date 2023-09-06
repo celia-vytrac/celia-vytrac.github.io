@@ -24,8 +24,8 @@ jobs:
         id: build
         run: |
           dir=$(mktemp -d)
-          echo ::set-output name=dir::"$dir"
           "$GITHUB_WORKSPACE"/scripts/build.sh "$dir"
+          echo "dir=$dir" >> "$GITHUB_ENV"
         
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
@@ -33,5 +33,5 @@ jobs:
         with:
           cname: web.vytrac.me
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: "${{ steps.build.outputs.dir }}"
+          publish_dir: "$dir"
           commit_message: ${{ github.event.head_commit.message }}
