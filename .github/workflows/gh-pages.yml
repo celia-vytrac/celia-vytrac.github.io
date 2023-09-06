@@ -6,7 +6,9 @@ on:
     - main
   pull_request:
 
-  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
 
 jobs:
   build:
@@ -29,7 +31,7 @@ jobs:
         
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         with:
           cname: web.vytrac.me
           github_token: ${{ secrets.GITHUB_TOKEN }}
