@@ -6,9 +6,9 @@ on:
     - main
   pull_request:
 
-  permissions:
-    contents: write
-    pages: write
+permissions:
+  contents: write
+  pages: write
 
 jobs:
   build:
